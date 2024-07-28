@@ -50,7 +50,7 @@ untuk FE dan BE disini saya menggunakan 100% laravel, dengan beberapa dukungan b
 1.  Clone repositori:
 
     ```sh
-    git clone https://github.com/nama-pengguna/repositori-anda.git
+    git clone https://github.com/fadliabdilah99/Altryapp.git
     ```
 
 2.  Navigasi ke direktori proyek:

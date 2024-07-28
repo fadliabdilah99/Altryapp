@@ -110,6 +110,8 @@
     </div>
     <!-- /.card -->
 
+    {{-- hello --}}
+
 
     @push('script')
         {{-- area chart --}}
