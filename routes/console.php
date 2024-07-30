@@ -10,6 +10,10 @@ Artisan::command('inspire', function () {
 
 function schedule(Schedule $schedule)
 {
+    // delete data invoice ketika invoice tenggat
     $schedule->command('orders:delete-expired')->daily();
+
+    // mengirim notifikasi whatsapp
+    $schedule->command('app:whatsapp-notify')->daily();
 }
 

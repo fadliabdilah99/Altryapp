@@ -20,7 +20,7 @@ class DeleteExpiredOrders extends Command
      *
      * @var string
      */
-    protected $description = 'Delete expired orders';
+    protected $description = 'Delete expired orders ';
 
     /**
      * Execute the console command.

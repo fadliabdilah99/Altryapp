@@ -1,6 +1,6 @@
 # Aplikasi Altry
 
-Deskripsi singkat tentang apa yang dilakukan proyek Anda dan tujuannya.
+Aplikasi Penjualan Dan Penyewaan
 
 ## Daftar Isi
 
