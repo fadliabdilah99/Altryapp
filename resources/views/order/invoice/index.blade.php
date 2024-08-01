@@ -119,20 +119,18 @@
                                 </div>
                                 <!-- /.row -->
 
-                                <div class="row">
+                                <div class="row d-flex justify-content-between">
                                     <!-- accepted payments column -->
-                                    <div class="col-6">
-                                        <p class="lead">Payment Methods:</p>
-                                        <img src="../../dist/img/credit/visa.png" alt="Visa">
-                                        <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
-                                        <img src="../../dist/img/credit/american-express.png" alt="American Express">
-                                        <img src="../../dist/img/credit/paypal2.png" alt="Paypal">
-
+                                    <div class="col-5 border">
+                                        <p class="lead">Syarat dan ketentuan:</p>
                                         <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
-                                            Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles, weebly ning
-                                            heekya handango imeem
-                                            plugg
-                                            dopplr jibjab, movity jajah plickers sifteo edmodo ifttt zimbra.
+                                            Dengan ini saya menyetujui bahwa, pihak altry berhak untuk melakukan
+                                            pembatalan barang yang telah disewa/dibeli secara sepihak, dengan
+                                            mendapatkan
+                                            ganti rugi sebesar 110% dari total pembayaran, ditambah dengan unit
+                                            pengganti (jika barang sewa). Apabila penyewa atau pembeli membatalkan
+                                            pesanan, maka pengembalian uang yang akan diterima adalah sebesar 90% dari
+                                            total pembayaran.
                                         </p>
                                     </div>
                                     <!-- /.col -->
@@ -169,6 +167,12 @@
                                     <div class="col-12">
                                         @if ($invoicedetail->status == 'proses' || $invoicedetail->status == 'selesai')
                                             <h1 class="text-success">LUNAS</h1>
+                                            <p>Altry group management</p>
+                                        @elseif($invoicedetail->status == 'tolak')
+                                            <h1 class="text-danger">DITOLAK</h1>
+                                            <p>Altry group management</p>
+                                        @elseif($invoicedetail->status == 'refund')
+                                            <h1 class="text-warning">REFUND</h1>
                                             <p>Altry group management</p>
                                         @endif
                                         <a href="{{ url('invoice-print/' . $id) }}" rel="noopener" target="_blank"
@@ -260,7 +264,7 @@
                                                 @method('DELETE')
                                                 <input type="number" name="id" value="{{ $id }}"
                                                     hidden>
-                                                <button class="btn bg-danger float-right" type="button">
+                                                <button class="btn bg-danger float-right" type="submit">
                                                     Tolak</button>
                                             </form>
 
@@ -320,12 +324,12 @@
 
 
 
-        <script>
-            // Payment Midtrans function
-            $("#payment_form").submit(function(event) {
-                event.preventDefault();
-        
-                $.post("/api/payment", {
+    <script>
+        // Payment Midtrans function
+        $("#payment_form").submit(function(event) {
+            event.preventDefault();
+
+            $.post("/api/payment", {
                         _method: 'POST',
                         _token: '{{ csrf_token() }}',
                         invoice_code: $('input#invoice_code').val(),
@@ -363,13 +367,13 @@
                         }
                         return false;
                     })
-                    .fail(function(xhr, status, error) {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please try again.');
-                    });
-            });
-        </script>
-        
+                .fail(function(xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        });
+    </script>
+
 
 
     {{-- fungsi copy --}}

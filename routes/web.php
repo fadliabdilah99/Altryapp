@@ -34,12 +34,14 @@ Route::get('order/{id}', [orderController::class, 'index']);
 Route::post('addcart', [orderController::class, 'createCart']);
 Route::get('cart', [orderController::class, 'cart']);
 Route::post('checkout', [orderController::class, 'checkout']);
-Route::get('invoicePanding/{id}', [orderController::class, 'invoicePanding']);
-Route::get('invoice-history/{id}', [orderController::class, 'invoiceHistory']);
+Route::get('invoicePanding/{id}', [orderController::class, 'invoice']);
+Route::get('invoice-history/{id}', [orderController::class, 'invoice']);
 Route::get('panding', [orderController::class, 'panding']);
 Route::get('invoice/{id}', [orderController::class, 'downloadInvoicePDF']);
 Route::get('invoice-print/{id}', [orderController::class, 'print']);
 Route::get('daftartanggal/{id}', [orderController::class, 'daftartanggal']);
+Route::post('daftartanggal/{id}', [orderController::class, 'daftartanggal']);
+Route::post('refund/{id}', [orderController::class, 'refund']);
 
 
 // pay controller
@@ -71,9 +73,12 @@ Route::group(['middleware' => ['role:admin,gudang']], function () {
 
     // order page
     Route::get('order-page', [orderController::class, 'admin']);
-    Route::post('invoice-confirm', [orderController::class, 'invoiceConfirm']);
     Route::delete('order-delete', [orderController::class, 'delete']);
 
+    // pay controller
+    Route::post('invoice-confirm', [payController::class, 'invoiceConfirm']);
+
+    
     // history page
     Route::get('history-admin', [historyController::class, 'indexAdmin']);
 });

@@ -65,17 +65,25 @@
                             <td>{{ $order->user->name }}</td>
                             <td>{{ $order->status }}</td>
                             <td>
-                                <a href="{{ url("invoicePanding/$order->idInvoice") }}" class="btn btn-secondary"><i class="bi bi-eye"></i></a>
+                                <a href="{{ url("invoicePanding/$order->idInvoice") }}" class="btn btn-secondary"><i
+                                        class="bi bi-eye"></i></a>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-primary" data-toggle="modal"
-                                    data-target="#edit">Konfimasi</button>
-                                <form action="{{ url("deleteorder/$order->id") }}" method="POST" style="display: inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn bg-danger delete-data" type="button"> Tolak
-                                    </button>
-                                </form>
+                                <div class="row d-flex justify-content-center">
+                                    <form action="{{ url('invoice-confirm') }}" method="POST">
+                                        @csrf
+                                        <input type="number" name="id" value="{{ $order->idInvoice }}" hidden>
+                                        <button class="btn btn-success mx-1 delete-data">Konfirmasi</button>
+                                    </form>
+
+                                    <form action="{{ url('order-delete') }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="number" name="id" value="{{ $order->idInvoice }}" hidden>
+                                        <button class="btn bg-danger  delete-data" type="button">
+                                            Tolak</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -117,7 +125,8 @@
                             <td>{{ $order->user->name }}</td>
                             <td>{{ $order->status }}</td>
                             <td>
-                                <a href="{{ url("invoicePanding/$order->idInvoice") }}" class="btn btn-secondary"><i class="bi bi-eye"></i></a>
+                                <a href="{{ url("invoicePanding/$order->idInvoice") }}" class="btn btn-secondary"><i
+                                        class="bi bi-eye"></i></a>
                             </td>
                         </tr>
                     @endforeach
@@ -189,10 +198,10 @@
         // script delete start
         $('.delete-data').click(function(e) {
             e.preventDefault()
-            const data = $(this).closest('tr').find('td:eq(1)').text()
+            const data = $(this).closest('tr').find('td:eq(0)').text()
             Swal.fire({
-                    title: 'Semua Data Terkait Akan Hilang',
-                    text: `Apakah penghapusan data ${data} akan dilanjutkan?`,
+                    title: 'data akan di tolak',
+                    text: `Apakah data ${data} akan di tolak?`,
                     icon: 'warning',
                     showDenyButton: true,
                     confirmButtonText: 'Ya',

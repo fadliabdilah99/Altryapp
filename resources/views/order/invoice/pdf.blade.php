@@ -48,7 +48,7 @@
             border-bottom: 2px solid #dee2e6;
         }
 
-        .table tbody + tbody {
+        .table tbody+tbody {
             border-top: 2px solid #dee2e6;
         }
 
@@ -171,6 +171,16 @@
                         </tr>
                     </table>
                 </div>
+                @if ($invoicedetail->status == 'proses' || $invoicedetail->status == 'selesai')
+                    <h1 class="text-success" style="color: green">LUNAS</h1>
+                    <p>Altry group management</p>
+                @elseif($invoicedetail->status == 'tolak')
+                    <h1 style="color: red">DITOLAK</h1>
+                    <p>Altry group management</p>
+                @elseif($invoicedetail->status == 'refund')
+                    <h1 style="color: orange">REFUND</h1>
+                    <p>Altry group management</p>
+                @endif
             </div>
         </div>
     </div>

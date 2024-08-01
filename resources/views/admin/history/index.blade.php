@@ -68,17 +68,26 @@
                                     <span class="badge bg-danger">expired</span>
                                 @elseif($history->status == 'proses' && $history->sampai_tgl > date('Y-m-d'))
                                     <span class="badge bg-success">active</span>
+                                @elseif($history->status == 'tolak')
+                                    <span class="badge bg-warning">Di Tolak</span>
                                 @else
                                     <span class="badge bg-primary">selesai</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="d-flex justify-content-center" style="gap: 10px">
                                 @if ($history->sampai_tgl < date('Y-m-d'))
                                     <a href="{{ url('selesai/' . $history->idInvoice) }}"
                                         class="btn btn-outline-success">Selasai</a>
                                 @endif
                                 <a href="{{ url('invoice-history/' . $history->idInvoice) }}"
                                     class="btn btn-outline-info">Invoice</a>
+                                @if ($history->status == 'proses' && $history->dari_tgl > date('Y-m-d'))
+                                    <form action="{{ url('refund/1') }}" method="POST">
+                                        @csrf
+                                        <input type="number" name="id" value="{{ $history->idInvoice }}" hidden>
+                                        <button class="btn btn-outline-warning refund-data" type="submit">Refund</button>
+                                    </form>
+                                @endif
 
                             </td>
                         </tr>
@@ -138,6 +147,24 @@
             Swal.fire({
                     title: 'Semua Data Terkait Akan Hilang',
                     text: `Apakah penghapusan data ${data} akan dilanjutkan?`,
+                    icon: 'warning',
+                    showDenyButton: true,
+                    confirmButtonText: 'Ya',
+                    denyButtonText: 'Tidak',
+                    focusConfirm: false
+                })
+                .then((result) => {
+                    if (result.isConfirmed) $(e.target).closest('form').submit()
+                    else swal.close()
+                })
+        });
+        // script refund start
+        $('.refund-data').click(function(e) {
+            e.preventDefault()
+            const data = $(this).closest('tr').find('td:eq(1)').text()
+            Swal.fire({
+                    title: 'data akan di refund',
+                    text: `Apakah data ${data} refund dilanjutkan?`,
                     icon: 'warning',
                     showDenyButton: true,
                     confirmButtonText: 'Ya',

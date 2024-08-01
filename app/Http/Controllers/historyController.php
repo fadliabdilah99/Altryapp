@@ -54,11 +54,8 @@ class historyController extends Controller
             ->select('idInvoice', DB::raw('MIN(id) as min_id'))
             ->get()
             ->pluck('min_id');
-        $data['history'] = history::whereIn('id', $invoices)->get();
-
+        $data['historys'] = history::whereIn('id', $invoices)->get();
 
         return view('history.index')->with($data);
     }
-
-    // 
 }

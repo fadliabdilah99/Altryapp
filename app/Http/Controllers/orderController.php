@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\pay;
 use App\Models\payment;
 use App\Models\Produk;
+use App\Models\wallet;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -33,52 +34,12 @@ class orderController extends Controller
 
         return view('admin.order.index')->with($data);
     }
-    public function invoiceConfirm(Request $request)
-    {
-        $id = $request->id;
-        $order = Order::where('idInvoice', $id)->get();
-        $countStok = Produk::where('id', $order[0]->produk_id)->first();
-        $pay = pay::where('order_id', $order[0]->idInvoice)->first();
-
-
-        // memindahkan data order ke history
-        foreach ($order as $history) {
-            $data = [
-                'idInvoice' => $history->idInvoice,
-                'user_id' => $history->user_id,
-                'produk_id' => $history->produk_id,
-            ];
-
-            if ($history->produk->kategori->jenis == 'sewa') {
-                $data['dari_tgl'] = $history->dari_tgl;
-                $data['sampai_tgl'] = $history->sampai_tgl;
-                $data['status'] = 'proses';
-            } elseif ($history->produk->kategori->jenis == 'jual') {
-                Produk::where('id', $history->produk_id)->update([
-                    'stok' => $countStok->stok - $history->qty,
-                ]);
-            }
-            history::create($data);
-
-            $record = [
-                'nominal' => $history->totalHarga,
-                'jenis' => 'order',
-                'deskripsi' => 'Pembelian ' . $history->produk->nama . ' dengan ID Invoice ' . $history->idInvoice,
-            ];
-            keuangan::create($record);
-        }
-        File::delete(public_path('images/payment/' . $pay->foto));
-        $pay->delete();
-        order::where('idInvoice', $order[0]->idInvoice)->delete();
-
-        return redirect('order-page')->with('success', 'Pembayaran Berhasil di Konfirmasi');
-    }
 
     // delete order
-    public function delete($id)
+    public function delete(Request $request)
     {
+        $id = $request->id;
         $orders = Order::where('idInvoice', $id)->get();
-
         foreach ($orders as $order) {
             $data = [
                 'idInvoice' => $order->idInvoice,
@@ -86,10 +47,15 @@ class orderController extends Controller
                 'produk_id' => $order->produk_id,
                 'dari_tgl' => $order->dari_tgl,
                 'sampai_tgl' => $order->sampai_tgl,
-                'status' => 'Di tolak',
+                'status' => 'tolak',
+                'totalHarga' => $order->totalHarga,
+                'qty' => $order->qty,
             ];
             history::create($data);
         }
+
+        $order->delete();
+        return redirect('order-page')->with('success', 'Data Order Berhasil di tolak');
     }
 
 
@@ -181,36 +147,26 @@ class orderController extends Controller
     }
 
 
-    // invoice page order controller-----------------------------------------------
-    public function invoiceHistory($id)
+
+
+    public function invoice($id)
     {
-        // mengambil data order
-        $data['orders'] = history::where('idInvoice', $id)->get();
-        $data['invoicedetail'] = history::where('idInvoice', $id)->first();
-
-        // data untuk harga
-        $data['subtotal'] = $data['orders']->sum('totalHarga');
-        $data['ppn'] = $data['subtotal'] * 0.11;
-        $data['admin'] = $data['subtotal'] * 0.01;
-        $data['total'] = $data['subtotal'] + $data['ppn'] + $data['admin'];
-
-        // id Invoice
-        $data['id'] = $id;
-
-        // memanggil foto untuk admin page
-        if (!empty(pay::get('order_id', $id))) {
-            $data['pay'] = pay::select('foto')->where('order_id', $id)->first();
-        }
-
-        return view('order.invoice.index')->with($data);
-    }
-    public function invoicePanding($id)
-    {
-        // mengambil data order
+        // Cek apakah data ada di Order
         $data['orders'] = Order::where('idInvoice', $id)->get();
         $data['invoicedetail'] = Order::where('idInvoice', $id)->first();
 
-        // data untuk harga
+        // Jika tidak ada di Order, cek di history
+        if ($data['orders']->isEmpty() || $data['invoicedetail'] == null) {
+            $data['orders'] = history::where('idInvoice', $id)->get();
+            $data['invoicedetail'] = history::where('idInvoice', $id)->first();
+        }
+
+        // Jika tetap tidak ditemukan, kembalikan error atau handle sesuai kebutuhan
+        if ($data['orders']->isEmpty() || $data['invoicedetail'] == null) {
+            return abort(404, 'Invoice not found');
+        }
+
+        // Data untuk harga
         $data['subtotal'] = $data['orders']->sum('totalHarga');
         $data['ppn'] = $data['subtotal'] * 0.11;
         $data['admin'] = $data['subtotal'] * 0.01;
@@ -219,13 +175,15 @@ class orderController extends Controller
         // id Invoice
         $data['id'] = $id;
 
-        // memanggil foto untuk admin page
-        if (!empty(pay::get('order_id', $id))) {
-            $data['pay'] = pay::select('foto')->where('order_id', $id)->first();
+        // Memanggil foto untuk admin page
+        $pay = pay::select('foto')->where('order_id', $id)->first();
+        if (!empty($pay)) {
+            $data['pay'] = $pay;
         }
 
         return view('order.invoice.index')->with($data);
     }
+
 
 
     // checkout function order controller-----------------------------------------------
@@ -338,8 +296,15 @@ class orderController extends Controller
 
     public function downloadInvoicePDF($id)
     {
+        // Cek apakah data ada di Order
         $orders = Order::where('idInvoice', $id)->get();
         $invoicedetail = Order::where('idInvoice', $id)->first();
+
+        // Jika tidak ada di Order, cek di history
+        if ($orders->isEmpty() || $invoicedetail == null) {
+            $orders = history::where('idInvoice', $id)->get();
+            $invoicedetail = history::where('idInvoice', $id)->first();
+        }
 
         $subtotal = $orders->sum('totalHarga');
         $ppn = $subtotal * 0.11;
@@ -369,6 +334,17 @@ class orderController extends Controller
         $data['orders'] = Order::where('idInvoice', $id)->get();
         $data['invoicedetail'] = Order::where('idInvoice', $id)->first();
 
+        // Jika tidak ada di Order, cek di history
+        if ($data['orders']->isEmpty() || $data['invoicedetail'] == null) {
+            $data['orders'] = history::where('idInvoice', $id)->get();
+            $data['invoicedetail'] = history::where('idInvoice', $id)->first();
+        }
+
+        // Jika tetap tidak ditemukan, kembalikan error atau handle sesuai kebutuhan
+        if ($data['orders']->isEmpty() || $data['invoicedetail'] == null) {
+            return abort(404, 'Invoice not found');
+        }
+
         // data untuk harga
         $data['subtotal'] = $data['orders']->sum('totalHarga');
         $data['ppn'] = $data['subtotal'] * 0.11;
@@ -378,5 +354,29 @@ class orderController extends Controller
         // id Invoice
         $data['id'] = $id;
         return view('order.invoice.invoice-print')->with($data);
+    }
+
+
+    // refund functiom
+    public function refund($id, Request $request)   
+    {
+        $orders = history::where('idInvoice', $request->id)->get();
+        foreach ($orders as $order) {
+            if($id == 2){
+                $refaund = 0.9;
+            }else if($id == 1){
+                $refaund = 1.1;
+            }
+            $data = [
+                'user_id' => $order->user_id,
+                'amount' => $order->totalHarga * $refaund,
+                'deskripsi' => 'pengembalian dari order ' . $order->idInvoice,
+            ];
+            wallet::create($data);
+        }
+        history::where('idInvoice', $request->id)->update([
+            'status' => 'refund',
+        ]);
+        return redirect()->back()->with('success', 'Data Order Berhasil di refund');
     }
 }
