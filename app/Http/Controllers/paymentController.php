@@ -36,7 +36,7 @@ class paymentController extends Controller
         );
     }
 
-  
+
 
     public function store(Request $request)
     {
@@ -57,6 +57,7 @@ class paymentController extends Controller
                     ->where('produk_id', $item->produk_id)
                     ->get();
                 $histories = history::where('produk_id', $item->produk_id)
+                    ->where('status', 'proses')
                     ->get();
 
                 // Pengecekan pada tb order

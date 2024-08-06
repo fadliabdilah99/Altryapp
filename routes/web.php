@@ -4,6 +4,7 @@ use App\Http\Controllers\authController;
 use App\Http\Controllers\historyController;
 use App\Http\Controllers\indexController;
 use App\Http\Controllers\kategoriController;
+use App\Http\Controllers\keuangansController;
 use App\Http\Controllers\orderController;
 use App\Http\Controllers\payController;
 use App\Http\Controllers\produkController;
@@ -81,6 +82,11 @@ Route::group(['middleware' => ['role:admin,gudang']], function () {
     
     // history page
     Route::get('history-admin', [historyController::class, 'indexAdmin']);
+
+    // history keuangan page
+    Route::get('record', [keuangansController::class, 'index']);
+    Route::post('addkeuangan', [keuangansController::class, 'create']);
+    Route::post('editcatatan/{id}', [keuangansController::class, 'edit']);
 });
 
 

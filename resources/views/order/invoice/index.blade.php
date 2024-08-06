@@ -187,7 +187,6 @@
 
                                                 {{-- payment otomatis --}}
                                                 <form action="#" id="payment_form">
-                                                    @csrf
                                                     <div class="" hidden>
                                                         <div class="row">
                                                             <div class="col-md-6">

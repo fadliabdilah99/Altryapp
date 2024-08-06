@@ -225,6 +225,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="record" class="nav-link">
+                        <i class="bi bi-currency-dollar"></i>
+                        <p>
+                            Keuangan
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="bi bi-envelope"></i>
                         <p>

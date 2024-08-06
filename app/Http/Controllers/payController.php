@@ -35,6 +35,7 @@ class payController extends Controller
                     ->where('produk_id', $item->produk_id)
                     ->get();
                 $histories = history::where('produk_id', $item->produk_id)
+                ->where('status', 'proses')
                     ->get();
 
                 // Pengecekan pada tb order
@@ -133,7 +134,7 @@ class payController extends Controller
 
             $record = [
                 'nominal' => $history->totalHarga,
-                'jenis' => 'order',
+                'jenis' => 'Pemasukan',
                 'deskripsi' => 'Pembelian ' . $history->produk->nama . ' dengan ID Invoice ' . $history->idInvoice,
             ];
             keuangan::create($record);

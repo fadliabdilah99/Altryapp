@@ -1,6 +1,6 @@
 @extends('template.main')
 
-@section('title', 'History')
+@section('title', 'Keuangan')
 
 @push('style')
     {{-- SweetAlert2 --}}
@@ -17,12 +17,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>History</h1>
+                    <h1>Keuangan</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ url('/home') }}">home</a></li>
-                        <li class="breadcrumb-item active">History</li>
+                        <li class="breadcrumb-item active">Keuangan</li>
                     </ol>
                 </div>
             </div>
@@ -47,50 +47,40 @@
         </div>
 
         <div class="card-body">
+            <button class="btn btn-success mb-2" type="button" data-toggle="modal" data-target="#addkeuangan">Tambah
+                Catatan</button>
+
             <table id="example1" class="table table-bordered table-striped text-center">
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th>Id Invoice</th>
-                        <th>Pembeli</th>
-                        <th>status</th>
+                        <th>Nominal</th>
+                        <th>jenis</th>
+                        <th>deskripsi</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($historys as $history)
+                    @foreach ($catatans as $catatan)
                         <tr>
-                            <td>{{ $history->id }}</td>
-                            <td>{{ $history->idInvoice }}</td>
-                            <td>{{ $history->user->name }}</td>
+                            <td>{{ $catatan->id }}</td>
+                            <td>{{ $catatan->nominal }}</td>
                             <td>
-                                @if ($history->sampai_tgl < date('Y-m-d') && $history->status == 'proses')
-                                    <span class="badge bg-danger">expired</span>
-                                @elseif($history->status == 'proses' && $history->sampai_tgl > date('Y-m-d'))
-                                    <span class="badge bg-success">active</span>
-                                @elseif($history->status == 'tolak')
-                                    <span class="badge bg-warning">Di Tolak</span>
-                                @elseif($history->status == 'refund')
-                                    <span class="badge bg-secondary">Refund</span>
+                                @if ($catatan->jenis == 'pemasukan')
+                                    <div class="text-success">
+                                        <i class=" bi bi-graph-up-arrow"></i>
+                                    </div>
                                 @else
-                                    <span class="badge bg-primary">selesai</span>
+                                    <div class="text-danger">
+                                        <i class="bi bi-graph-down-arrow"></i>
+                                    </div>
                                 @endif
                             </td>
-                            <td class="d-flex justify-content-center" style="gap: 10px">
-                                @if ($history->sampai_tgl < date('Y-m-d'))
-                                    <a href="{{ url('selesai/' . $history->idInvoice) }}"
-                                        class="btn btn-outline-success">Selasai</a>
-                                @endif
-                                <a href="{{ url('invoice-history/' . $history->idInvoice) }}"
-                                    class="btn btn-outline-info">Invoice</a>
-                                @if ($history->status == 'proses' && $history->dari_tgl > date('Y-m-d'))
-                                    <form action="{{ url('refund/1') }}" method="POST">
-                                        @csrf
-                                        <input type="number" name="id" value="{{ $history->idInvoice }}" hidden>
-                                        <button class="btn btn-outline-warning refund-data" type="submit">Refund</button>
-                                    </form>
-                                @endif
-
+                            <td>{{ $catatan->deskripsi }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
+                                    data-target="#editdata" onclick="onEdit(this, {{ $catatan->id }})">Edit</button>
+                                <a href="" class="btn btn-sm btn-danger">Delete</a>
                             </td>
                         </tr>
                     @endforeach
@@ -101,7 +91,7 @@
     </div>
     <!-- /.card -->
 
-    @include('admin.history.modal')
+    @include('admin.keuangan.modal')
 @endsection
 {{-- content --}}
 
@@ -160,23 +150,23 @@
                     else swal.close()
                 })
         });
-        // script refund start
-        $('.refund-data').click(function(e) {
-            e.preventDefault()
-            const data = $(this).closest('tr').find('td:eq(1)').text()
-            Swal.fire({
-                    title: 'data akan di refund',
-                    text: `Apakah data ${data} refund dilanjutkan?`,
-                    icon: 'warning',
-                    showDenyButton: true,
-                    confirmButtonText: 'Ya',
-                    denyButtonText: 'Tidak',
-                    focusConfirm: false
-                })
-                .then((result) => {
-                    if (result.isConfirmed) $(e.target).closest('form').submit()
-                    else swal.close()
-                })
-        });
+    </script>
+
+
+    {{-- delete data --}}
+    <script>
+        function onEdit(btn, catatanId) {
+            const tr = btn.closest('tr');
+            const tds = tr.querySelectorAll('td');
+            const modalId = ['nominal', 'jenis', 'deskripsi'];
+
+            // Mengisi nilai ke input modal
+            document.getElementById(modalId[0]).value = tds[1].textContent.trim();
+            document.getElementById(modalId[1]).value = tds[2].textContent.trim();
+            document.getElementById(modalId[2]).value = tds[3].textContent.trim();
+
+
+            document.getElementById('editmodals').action = `editcatatan/${catatanId}`
+        }
     </script>
 @endpush
